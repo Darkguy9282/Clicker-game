@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Click Counter Mobile</title>
+<style>
+body {
+  font-family: Arial, sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 140px;
+  transition: background 0.3s;
+}
+#counter { font-size: 2rem; margin-bottom: 20px; text-align:center; }
+#clickBtn {
+  padding: 18px 36px;
+  font-size: 1.5rem;
+  cursor: pointer;
+  border-radius: 12px;
+  border: 1px solid #ccc;
+  background: #f2f2f2;
+  min-width: 120px;
+}
+.topToggle {
+  position: fixed;
+  left: 10px;
+  width: 120px;
+  padding: 12px;
+  background: #ffffff;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  text-align: center;
+  font-size: 1rem;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  font-weight: bold;
+  user-select: none;
+}
+#shopToggle { top: 20px; }
+#rebirthToggle { top: 80px; }
+#themesToggle { top: 140px; }
+.dropdownPanel {
+  position: fixed;
+  left: 10px;
+  width: 220px;
+  padding: 14px;
+  background: #ffffff;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.1);
+  transform-origin: top;
+  transform: scaleY(0);
+  opacity: 0;
+  transition: all 0.25s ease;
+  z-index: 999;
+}
+.dropdownPanel.open { transform: scaleY(1); opacity: 1; }
+.item { margin-top: 12px; display: flex; flex-direction: column; gap: 6px; }
+.buyBtn { padding: 10px; border-radius: 8px; border: 1px solid #bbb; background: #fafafa; cursor: pointer; font-size: 1rem; }
+.buyBtn:disabled { opacity: .5; cursor: not-allowed; }
+.skinBox { width: 50px; height: 50px; border-radius: 8px; border: 2px solid #000; cursor: pointer; }
+#resetBtn { position: fixed; top: 20px; right: 10px; padding: 12px 16px; background: #ffdddd; border: 1px solid #cc8888; border-radius: 8px; cursor: pointer; font-weight: bold; font-size:1rem; }
+#resetBtn:hover { background: #ffcccc; }
+
+/* Mobile adjustments */
+@media (max-width: 480px) {
+  #clickBtn { padding: 16px 28px; font-size: 1.3rem; min-width:100px; }
+  .topToggle { width: 100px; font-size: 0.9rem; padding: 10px; }
+  .dropdownPanel { width: 200px; left: 5px; padding: 12px; }
+}
+</style>
+</head>
+<body>
+
+<div id="shopToggle" class="topToggle">SHOP ▼</div>
+<div id="rebirthToggle" class="topToggle">REBIRTHS ▼</div>
+<div id="themesToggle" class="topToggle">THEMES ▼</div>
+<button id="resetBtn">Reset</button>
+
+<div id="shopPanel" class="dropdownPanel">
+  <h3>Shop</h3>
+  <div class="item">
+    <strong>Click Multiplier</strong>
+    <div id="multiplierDisplay">Current Multiplier: x1</div>
+    <div id="multiplierCostDisplay">Cost: 50</div>
+    <button id="buyMultiplier" class="buyBtn">Buy x2</button>
+  </div>
+  <div class="item">
+    <strong>Auto Clicker</strong>
+    <div id="autoDisplay">Auto Clickers: 0</div>
+    <div id="autoCostDisplay">Cost: 10</div>
+    <button id="buyAuto" class="buyBtn">Buy Auto</button>
+  </div>
+</div>
+
+<div id="rebirthPanel" class="dropdownPanel">
+  <h3>Rebirths</h3>
+  <div class="item">
+    <div id="rebirthDisplay">Rebirths: 0</div>
+    <div id="rebirthCostDisplay">Cost: 1000</div>
+    <button id="buyRebirth" class="buyBtn">Rebirth</button>
+  </div>
+</div>
+
+<div id="themesPanel" class="dropdownPanel">
+  <h3>Themes</h3>
+  <button id="themeLight" class="buyBtn">Light Theme</button>
+  <button id="themeDark" class="buyBtn">Dark Theme</button>
+</div>
+
+<div id="counter">Clicks: 0</div>
+<button id="clickBtn">Click Me</button>
+
+<script>
+let count=0, multiplier=1, multiplierCost=50, autoClickers=0, autoCost=10, rebirths=0, rebirthCost=1000;
+const counterEl=document.getElementById('counter'), clickBtn=document.getElementById('clickBtn');
+const shopToggle=document.getElementById('shopToggle'), rebirthToggle=document.getElementById('rebirthToggle'), themesToggle=document.getElementById('themesToggle');
+const shopPanel=document.getElementById('shopPanel'), rebirthPanel=document.getElementById('rebirthPanel'), themesPanel=document.getElementById('themesPanel');
+const resetBtn=document.getElementById('resetBtn');
+const buyMultiplier=document.getElementById('buyMultiplier'), buyAuto=document.getElementById('buyAuto'), buyRebirth=document.getElementById('buyRebirth');
+const multiplierDisplay=document.getElementById('multiplierDisplay'), multiplierCostDisplay=document.getElementById('multiplierCostDisplay');
+const autoDisplay=document.getElementById('autoDisplay'), autoCostDisplay=document.getElementById('autoCostDisplay');
+const rebirthDisplay=document.getElementById('rebirthDisplay'), rebirthCostDisplay=document.getElementById('rebirthCostDisplay');
+const themeLight=document.getElementById('themeLight'), themeDark=document.getElementById('themeDark');
+
+shopToggle.onclick=()=>{shopPanel.classList.toggle('open');};
+rebirthToggle.onclick=()=>{rebirthPanel.classList.toggle('open');};
+themesToggle.onclick=()=>{themesPanel.classList.toggle('open');};
+
+function updateDisplay(){
+  counterEl.textContent=`Clicks: ${Math.floor(count)}`;
+  multiplierDisplay.textContent=`Current Multiplier: x${multiplier}`;
+  multiplierCostDisplay.textContent=`Cost: ${multiplierCost}`;
+  buyMultiplier.disabled=count<multiplierCost;
+  autoDisplay.textContent=`Auto Clickers: ${autoClickers}`;
+  autoCostDisplay.textContent=`Cost: ${autoCost}`;
+  buyAuto.disabled=count<autoCost;
+  rebirthDisplay.textContent=`Rebirths: ${rebirths}`;
+  rebirthCostDisplay.textContent=`Cost: ${rebirthCost}`;
+  buyRebirth.disabled=count<rebirthCost;
+}
+
+clickBtn.onclick=()=>{count+=multiplier;updateDisplay();};
+buyMultiplier.onclick=()=>{if(count>=multiplierCost){count-=multiplierCost;multiplier*=2;multiplierCost*=2;updateDisplay();}}
+buyAuto.onclick=()=>{if(count>=autoCost){count-=autoCost;autoClickers++;autoCost*=2;updateDisplay();}}
+buyRebirth.onclick=()=>{if(count>=rebirthCost){count=0;multiplier=1;autoClickers=0;rebirths++;rebirthCost=Math.floor(rebirthCost*2.5);multiplier+=rebirths*5;updateDisplay();}}
+setInterval(()=>{if(autoClickers>0){count+=autoClickers*multiplier;updateDisplay();}},1000);
+resetBtn.onclick=()=>{count=0;multiplier=1;multiplierCost=50;autoClickers=0;autoCost=10;rebirths=0;rebirthCost=1000;updateDisplay();}
+themeLight.onclick=()=>{document.body.style.background='white';}
+themeDark.onclick=()=>{document.body.style.background='#111';}
+updateDisplay();
+</script>
+</body>
+</html>
